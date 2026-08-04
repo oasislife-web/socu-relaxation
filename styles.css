@@ -738,10 +738,9 @@
     .section--split { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
   }
 
+  /* キシさんの写真は顔が切れないよう、元の縦横比のまま表示する */
   .split__media img {
     inline-size: 100%;
-    aspect-ratio: 4 / 5;
-    object-fit: cover;
     border-radius: 2px;
   }
 
@@ -781,6 +780,54 @@
     border: 1px solid var(--line);
   }
   .access__map iframe { inline-size: 100%; block-size: 100%; }
+
+  /* お支払い方法 */
+  .payments {
+    margin-block-start: clamp(2.5rem, 6vw, 4rem);
+    padding-block-start: clamp(2rem, 4vw, 3rem);
+    border-block-start: 1px solid var(--line);
+  }
+
+  .payments__title {
+    font-family: var(--font-display);
+    font-size: .75rem;
+    font-weight: 400;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--pine);
+    margin-block-end: .5rem;
+  }
+
+  .payments__note {
+    font-size: .92rem;
+    color: var(--ink-soft);
+    margin-block-end: 1.5rem;
+    max-inline-size: var(--measure);
+  }
+
+  .payments__chart {
+    inline-size: 100%;
+    max-inline-size: 22rem;
+    block-size: auto;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: .75rem;
+  }
+
+  /* 広い画面では、説明を左・決済表を右に並べる */
+  @media (min-width: 48rem) {
+    .payments {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      /* 3行目に余りを逃がして、見出しと本文がくっつくようにする */
+      grid-template-rows: auto auto 1fr;
+      column-gap: clamp(1.75rem, 4vw, 3rem);
+    }
+    .payments__title { grid-area: 1 / 1; }
+    .payments__note  { grid-area: 2 / 1; margin-block-end: 0; }
+    .payments__chart { grid-area: 1 / 2 / span 3 / auto; }
+  }
 }
 
 /* ---------------------------------------------------------------
