@@ -325,7 +325,6 @@
 @layer components {
   .hero {
     position: relative;
-    isolation: isolate;
     display: grid;
     align-items: end;
     min-block-size: min(82dvh, 46rem);
@@ -334,11 +333,28 @@
     color: #fff;
   }
 
+  /* 背景の動画とポスター画像。
+     ここで z-index にマイナスの値を使うと、iPhone(Safari系)で動画が
+     再生を始めた瞬間に、上に載っている文字が一瞬消える不具合が起きる。
+     マイナスを使わず、動画側を独立した描画レイヤーに固定して回避している。 */
   .hero__media {
     position: absolute;
     inset: 0;
-    z-index: -2;
+    z-index: 0;
     background: var(--pine-deep) url("assets/hero-poster.webp") center / cover no-repeat;
+    transform: translateZ(0);
+  }
+
+  /* 文字を読みやすくするための暗い膜。動画と同じレイヤーの中に入れる */
+  .hero__media::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to top,
+        color-mix(in srgb, var(--pine-deep) 92%, transparent) 0%,
+        color-mix(in srgb, #12160f 68%, transparent) 42%,
+        color-mix(in srgb, #12160f 48%, transparent) 100%);
   }
 
   .hero__video {
@@ -354,19 +370,10 @@
     .hero__video { display: none; }
   }
 
-  .hero::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background:
-      linear-gradient(to top,
-        color-mix(in srgb, var(--pine-deep) 92%, transparent) 0%,
-        color-mix(in srgb, #12160f 68%, transparent) 42%,
-        color-mix(in srgb, #12160f 48%, transparent) 100%);
-  }
-
+  /* 文字は動画より必ず手前に置く */
   .hero__inner {
+    position: relative;
+    z-index: 1;
     max-inline-size: var(--wide);
     inline-size: 100%;
     margin-inline: auto;

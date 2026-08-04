@@ -34,6 +34,11 @@
 - `styles.css` … `@layer reset, base, layout, components, utilities` で構成。色は `:root` のカスタムプロパティ
 - 言語切り替え … `<html>` の `lang-en` クラスで `[lang="ja"]` / `[lang="en"]` を出し分け。localStorageに保存
 - ヒーロー … 自動再生・無音・ループの背景動画。`prefers-reduced-motion` ではポスター画像のみ表示
+  - **ヒーロー内で `z-index` にマイナス値を使わないこと。**
+    背景動画をマイナス階層に置くと、iPhone(Safari系)で動画が再生を始めた瞬間に、
+    上に載っている文字が一瞬消える不具合が起きる(実機で発生を確認済み)。
+    `.hero__media` を `z-index: 0` + `transform: translateZ(0)` で独立レイヤーに固定し、
+    `.hero__inner` を `z-index: 1` に置くことで回避している
 
 ## デザインの方針
 
