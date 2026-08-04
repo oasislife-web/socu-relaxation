@@ -30,16 +30,24 @@
     <img src="assets/img/logo.webp" alt="脱毛・リラクSOCU" width="256" height="256" fetchpriority="high">
   </a>
 
-  <nav class="site-nav" aria-label="セクション">
+  <nav class="site-nav" id="siteNav" aria-label="セクション">
     <a href="#menu"><span lang="ja">メニュー</span><span lang="en">Menu</span></a>
+    <a href="#hair"><span lang="ja">脱毛</span><span lang="en">Hair removal</span></a>
     <a href="#flow"><span lang="ja">流れ</span><span lang="en">Visit</span></a>
     <a href="#voices"><span lang="ja">お客様の声</span><span lang="en">Reviews</span></a>
     <a href="#access"><span lang="ja">アクセス</span><span lang="en">Access</span></a>
+    <a href="#faq"><span lang="ja">よくある質問</span><span lang="en">FAQ</span></a>
   </nav>
 
   <button type="button" class="lang-toggle" id="langToggle" aria-pressed="false">
     <span class="lang-toggle__opt" data-opt="ja">日本語</span>
     <span class="lang-toggle__opt" data-opt="en">EN</span>
+  </button>
+
+  <button type="button" class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="siteNav">
+    <span class="nav-toggle__bars" aria-hidden="true"></span>
+    <span class="visually-hidden" lang="ja">メニューを開く</span>
+    <span class="visually-hidden" lang="en">Open menu</span>
   </button>
 </header>
 
@@ -607,6 +615,44 @@
     apply(next);
     try { localStorage.setItem(KEY, next); } catch (e) {}
   });
+})();
+
+/* スマホのハンバーガーメニュー */
+(function () {
+  var head = document.querySelector('.site-head');
+  var nav  = document.getElementById('siteNav');
+  var btn  = document.getElementById('navToggle');
+
+  function setOpen(open) {
+    head.classList.toggle('is-open', open);
+    btn.setAttribute('aria-expanded', String(open));
+  }
+
+  btn.addEventListener('click', function () {
+    setOpen(btn.getAttribute('aria-expanded') !== 'true');
+  });
+
+  /* 行き先を選んだら閉じる */
+  nav.addEventListener('click', function (e) {
+    if (e.target.closest('a')) setOpen(false);
+  });
+
+  /* Escキーで閉じて、ボタンにフォーカスを戻す */
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && head.classList.contains('is-open')) {
+      setOpen(false);
+      btn.focus();
+    }
+  });
+
+  /* メニュー以外を触ったら閉じる */
+  document.addEventListener('click', function (e) {
+    if (head.classList.contains('is-open') && !head.contains(e.target)) setOpen(false);
+  });
+
+  /* パソコン幅に広げたときは開いた状態を解除する */
+  var wide = window.matchMedia('(min-width: 52rem)');
+  wide.addEventListener('change', function (e) { if (e.matches) setOpen(false); });
 })();
 </script>
 

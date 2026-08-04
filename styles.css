@@ -57,6 +57,10 @@
     --measure: 42rem;
     --wide: 70rem;
 
+    /* ヘッダーとスマホ固定バーの高さ。ヒーローの高さの計算に使います */
+    --head-h: 4.25rem;
+    --bar-h:  3.5rem;
+
     color-scheme: light;
     accent-color: var(--pine);
   }
@@ -106,12 +110,8 @@
     -webkit-font-smoothing: antialiased;
     /* 数字の高さを揃える(Georgiaは既定だと高さがバラつくため) */
     font-variant-numeric: lining-nums;
-    /* スマホの固定バーに隠れないよう下に余白 */
-    padding-block-end: 4.5rem;
-  }
-
-  @media (min-width: 48rem) {
-    body { padding-block-end: 0; }
+    /* 一番下までスクロールしたときの跳ね返りを抑える */
+    overscroll-behavior-block: none;
   }
 
   /* 折り返しはブラウザ標準のまま。
@@ -253,7 +253,9 @@
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: .5rem var(--gutter);
+    /* ヒーローの高さを計算で出しているので、ここは高さを固定する */
+    block-size: var(--head-h);
+    padding-inline: var(--gutter);
     background: color-mix(in srgb, var(--pine-deep) 94%, transparent);
     backdrop-filter: blur(10px);
     color: #fff;
@@ -267,23 +269,111 @@
     filter: brightness(0) invert(1);
   }
 
+  /* ---- ナビゲーション ---- */
+  /* スマホでは閉じた引き出し、パソコンでは横並び */
   .site-nav {
     display: none;
-    margin-inline-start: auto;
-    gap: 1.75rem;
     font-size: .85rem;
     letter-spacing: .08em;
   }
-  @media (min-width: 52rem) { .site-nav { display: flex; } }
 
   .site-nav a {
     text-decoration: none;
     color: color-mix(in srgb, #fff 78%, transparent);
-    padding-block: .35rem;
-    border-block-end: 1px solid transparent;
     transition: color .2s, border-color .2s;
   }
-  .site-nav a:hover { color: #fff; border-block-end-color: var(--leaf); }
+  .site-nav a:hover { color: #fff; }
+
+  /* パソコン ------------------------------------------------ */
+  @media (min-width: 52rem) {
+    .site-nav {
+      display: flex;
+      margin-inline-start: auto;
+      gap: 1.75rem;
+    }
+    .site-nav a {
+      padding-block: .35rem;
+      border-block-end: 1px solid transparent;
+    }
+    .site-nav a:hover { border-block-end-color: var(--leaf); }
+  }
+
+  /* スマホ ------------------------------------------------- */
+  @media (max-width: 51.999rem) {
+    .site-head.is-open .site-nav {
+      display: grid;
+      position: fixed;
+      inset-block-start: var(--head-h);
+      inset-inline: 0;
+      max-block-size: calc(100svh - var(--head-h));
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding: .5rem var(--gutter) 1.25rem;
+      background: var(--pine-deep);
+      border-block-start: 1px solid color-mix(in srgb, #fff 15%, transparent);
+      box-shadow: 0 12px 24px rgb(0 0 0 / .25);
+    }
+
+    .site-head.is-open .site-nav a {
+      padding-block: .95rem;
+      font-size: 1rem;
+      border-block-end: 1px solid color-mix(in srgb, #fff 12%, transparent);
+    }
+    .site-head.is-open .site-nav a:last-child { border-block-end: 0; }
+  }
+
+  /* ---- ハンバーガーボタン ---- */
+  .nav-toggle {
+    display: grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    margin-inline-start: .25rem;
+    padding: 0;
+    background: transparent;
+    border: 1px solid color-mix(in srgb, #fff 38%, transparent);
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  @media (min-width: 52rem) { .nav-toggle { display: none; } }
+
+  /* 3本線。開いているときは×印になる */
+  .nav-toggle__bars,
+  .nav-toggle__bars::before,
+  .nav-toggle__bars::after {
+    content: "";
+    display: block;
+    inline-size: 1.05rem;
+    block-size: 1.5px;
+    background: #fff;
+    border-radius: 2px;
+    transition: transform .22s ease, opacity .15s ease;
+  }
+  .nav-toggle__bars { position: relative; }
+  .nav-toggle__bars::before { position: absolute; translate: 0 -.36rem; }
+  .nav-toggle__bars::after  { position: absolute; translate: 0 .36rem; }
+
+  .nav-toggle[aria-expanded="true"] .nav-toggle__bars { background: transparent; }
+  .nav-toggle[aria-expanded="true"] .nav-toggle__bars::before { translate: 0 0; rotate: 45deg; }
+  .nav-toggle[aria-expanded="true"] .nav-toggle__bars::after  { translate: 0 0; rotate: -45deg; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-toggle__bars,
+    .nav-toggle__bars::before,
+    .nav-toggle__bars::after { transition: none; }
+  }
+
+  /* 画面読み上げ用。目には見えないが読み上げソフトには伝わる */
+  .visually-hidden {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 
   .lang-toggle {
     margin-inline-start: auto;
@@ -327,10 +417,23 @@
     position: relative;
     display: grid;
     align-items: end;
-    min-block-size: min(82dvh, 46rem);
-    padding: clamp(3rem, 8vw, 6rem) var(--gutter) clamp(2.5rem, 6vw, 4.5rem);
+    /* スマホは「ヘッダーを除いた画面いっぱい」。
+       dvh ではなく svh を使うのが重要。dvh はスクロール中にブラウザのバーが
+       出入りするたび値が変わるため、高さが伸び縮みして画面が震える原因になる。
+       svh は変動しないので、その揺れが起きない。 */
+    min-block-size: calc(100svh - var(--head-h));
+    /* 固定バーにボタンが隠れないよう、下に固定バーぶんの余白を足す */
+    padding: clamp(3rem, 8vw, 6rem) var(--gutter)
+             calc(clamp(2.5rem, 6vw, 4.5rem) + var(--bar-h));
     overflow: clip;
     color: #fff;
+  }
+
+  @media (min-width: 48rem) {
+    .hero {
+      min-block-size: min(82svh, 46rem);
+      padding-block-end: clamp(2.5rem, 6vw, 4.5rem);
+    }
   }
 
   /* 背景の動画とポスター画像。
@@ -978,6 +1081,15 @@
     padding: clamp(3rem, 7vw, 4.5rem) var(--gutter);
     font-size: .88rem;
     line-height: 1.9;
+  }
+
+  /* スマホでは、フッターの緑を固定バーの下まで伸ばす。
+     body に下余白をつける方式だと、フッターの下に白い帯が見えてしまうため。 */
+  @media (max-width: 47.999rem) {
+    .site-foot {
+      padding-block-end: calc(clamp(3rem, 7vw, 4.5rem) + var(--bar-h)
+                              + env(safe-area-inset-bottom));
+    }
   }
 
   .site-foot__logo {
