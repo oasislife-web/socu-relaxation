@@ -16,7 +16,15 @@
 <meta property="og:locale" content="ja_JP">
 
 <link rel="icon" href="assets/img/logo.webp" type="image/webp">
-<link rel="preload" href="assets/fonts/inter-numerals.woff2" as="font" type="font/woff2" crossorigin>
+
+<!-- 本文の書体(Zen Old Mincho)。端末に入っている明朝体に頼ると、
+     WindowsとiPhoneと海外の端末で見た目がバラバラになるため読み込んでいます。
+     Google Fonts は「そのページで実際に使った文字」だけを配信するので転送量は小さいです。 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;500;700&display=swap">
+
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>

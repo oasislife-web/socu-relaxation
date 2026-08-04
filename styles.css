@@ -8,22 +8,6 @@
 @layer reset, base, layout, components, utilities;
 
 /* ---------------------------------------------------------------
-   数字だけのWebフォント
-
-   数字・カンマ・小数点・¥ の12文字だけを切り出した Inter を読み込みます。
-   ファイルは 8KB。iPhone・Android・PC のどれで見ても同じ数字になります。
-
-   unicode-range で「この文字のときだけ使う」と指定しているため、
-   日本語と英文はこれまでどおり明朝体・Georgia のまま変わりません。
-   --------------------------------------------------------------- */
-@font-face {
-  font-family: "SiteNumerals";
-  src: url("assets/fonts/inter-numerals.woff2") format("woff2");
-  unicode-range: U+002C, U+002E, U+0030-0039, U+00A5;
-  font-display: swap;
-}
-
-/* ---------------------------------------------------------------
    デザイントークン
    --------------------------------------------------------------- */
 @layer base {
@@ -44,11 +28,19 @@
 
     /* 文字 -----------------------------------------------------
        サイト全体を明朝体で統一しています。
-       欧文も明朝の英字を使うため、和文と欧文で書体が混ざりません。 */
-    /* 先頭の SiteNumerals は数字専用(上の @font-face を参照)。
-       数字以外は Georgia(欧文)→ 明朝体(和文)の順に使われます。 */
-    --font-display: "SiteNumerals", Georgia, "Hiragino Mincho ProN", "Yu Mincho",
-                    YuMincho, "Noto Serif JP", "BIZ UDMincho", "MS PMincho", serif;
+       主役は Zen Old Mincho(Webフォント。index.html の <link> で読み込み)。
+       和文も欧文も数字もこの1書体でまかなうので、書体が混ざりません。
+       端末任せだった頃と違い、Windows・iPhone・海外の端末で見た目が揃います。
+
+       以前は数字だけ別フォント(Segoe UIを切り出した SiteNumerals)に
+       差し替えていましたが、それは「端末ごとに数字がバラつくのを防ぐ」ためでした。
+       Webフォントを入れて全端末で同じ字になったので役目を終え、
+       数字だけゴシックで浮いて見えるという指摘もあり削除しました。
+
+       Zen Old Mincho より後ろは、読み込みに失敗したときの控えです。 */
+    --font-display: "Zen Old Mincho", Georgia,
+                    "Hiragino Mincho ProN", "Yu Mincho", YuMincho,
+                    "Noto Serif JP", "BIZ UDMincho", "MS PMincho", serif;
     --font-body:    var(--font-display);
 
     /* 余白 ----------------------------------------------------- */
@@ -108,7 +100,7 @@
     line-height: 1.85;
     letter-spacing: .02em;
     -webkit-font-smoothing: antialiased;
-    /* 数字の高さを揃える(Georgiaは既定だと高さがバラつくため) */
+    /* 数字の高さを揃える(控えのGeorgiaが使われたとき、既定だと高さがバラつくため) */
     font-variant-numeric: lining-nums;
     /* 一番下までスクロールしたときの跳ね返りを抑える */
     overscroll-behavior-block: none;
@@ -189,7 +181,8 @@
 
   .section__title {
     font-family: var(--font-display);
-    font-weight: 300;
+    /* Zen Old Mincho に 300 は無いので 400。指定しないと見出しが太字になる */
+    font-weight: 400;
     font-size: clamp(1.7rem, 1.1rem + 2.6vw, 2.9rem);
     line-height: 1.35;
     letter-spacing: .01em;
@@ -260,16 +253,18 @@
        元は 94% の半透明 + blur(10px) だったが、94% も塗ってあれば
        ぼかしはほぼ見えないうえ、スクロール中ずっと背後(再生中の動画)を
        ぼかし直すためスマホで引っかかる原因になっていた。 */
-    background: var(--pine-deep);
-    color: #fff;
+    background: #fff;
+    color: var(--pine);
+    /* 白い背景のままだと、下のヒーロー(動画)との境目が消えるので細い罫線を引く */
+    border-block-end: 1px solid var(--line);
   }
 
   .site-head__brand { display: block; line-height: 0; }
   .site-head__brand img {
-    inline-size: 3.1rem;
+    /* 白抜きだった頃より線が細く見えるので、白い帯では少し大きめにしている */
+    inline-size: 3.6rem;
     block-size: auto;
-    /* 緑の帯に載せるので、ロゴを白抜きにする */
-    filter: brightness(0) invert(1);
+    /* 白い帯なので、ロゴは元の緑のまま出す */
   }
 
   /* ---- ナビゲーション ---- */
@@ -282,10 +277,10 @@
 
   .site-nav a {
     text-decoration: none;
-    color: color-mix(in srgb, #fff 78%, transparent);
+    color: var(--ink-soft);
     transition: color .2s, border-color .2s;
   }
-  .site-nav a:hover { color: #fff; }
+  .site-nav a:hover { color: var(--pine); }
 
   /* パソコン ------------------------------------------------ */
   @media (min-width: 52rem) {
@@ -299,12 +294,12 @@
       padding-block: .35rem;
       border-block-end: 1px solid transparent;
     }
-    .site-nav a:hover { border-block-end-color: var(--leaf); }
+    .site-nav a:hover { border-block-end-color: var(--pine); }
 
     /* 「ご予約」だけは、いつでも行き先だと分かるように下線を出しておく */
     .site-nav .nav-cta {
-      color: #fff;
-      border-block-end-color: var(--leaf);
+      color: var(--pine);
+      border-block-end-color: var(--pine);
     }
   }
 
@@ -319,15 +314,15 @@
       overflow-y: auto;
       overscroll-behavior: contain;
       padding: .5rem var(--gutter) 1.25rem;
-      background: var(--pine-deep);
-      border-block-start: 1px solid color-mix(in srgb, #fff 15%, transparent);
-      box-shadow: 0 12px 24px rgb(0 0 0 / .25);
+      background: #fff;
+      border-block-start: 1px solid var(--line);
+      box-shadow: 0 12px 24px rgb(27 36 30 / .12);
     }
 
     .site-head.is-open .site-nav a {
       padding-block: .95rem;
       font-size: 1rem;
-      border-block-end: 1px solid color-mix(in srgb, #fff 12%, transparent);
+      border-block-end: 1px solid var(--line-soft);
     }
     .site-head.is-open .site-nav a:last-child { border-block-end: 0; }
   }
@@ -341,7 +336,7 @@
     margin-inline-start: .25rem;
     padding: 0;
     background: transparent;
-    border: 1px solid color-mix(in srgb, #fff 38%, transparent);
+    border: 1px solid color-mix(in srgb, var(--pine) 35%, transparent);
     border-radius: 999px;
     cursor: pointer;
   }
@@ -355,7 +350,7 @@
     display: block;
     inline-size: 1.05rem;
     block-size: 1.5px;
-    background: #fff;
+    background: var(--pine);
     border-radius: 2px;
     transition: transform .22s ease, opacity .15s ease;
   }
@@ -389,7 +384,7 @@
     margin-inline-start: auto;
     display: inline-flex;
     align-items: stretch;
-    border: 1px solid color-mix(in srgb, #fff 38%, transparent);
+    border: 1px solid color-mix(in srgb, var(--pine) 35%, transparent);
     border-radius: 999px;
     background: transparent;
     padding: 2px;
@@ -406,17 +401,17 @@
     font-size: .75rem;
     letter-spacing: .08em;
     border-radius: 999px;
-    color: color-mix(in srgb, #fff 72%, transparent);
+    color: var(--ink-soft);
     white-space: nowrap;
   }
 
   :root:not(.lang-en) .lang-toggle__opt[data-opt="ja"],
   :root.lang-en       .lang-toggle__opt[data-opt="en"] {
-    background: #fff;
-    color: var(--pine-deep);
+    background: var(--pine);
+    color: #fff;
   }
 
-  .site-head :focus-visible { outline-color: var(--leaf); }
+  .site-head :focus-visible { outline-color: var(--pine); }
 }
 
 /* ---------------------------------------------------------------
@@ -531,12 +526,12 @@
     justify-items: start;
     gap: .35rem;
     margin-block-end: 1.4rem;
-    font-weight: 300;
+    font-weight: 400;
   }
 
   .hero__wordmark {
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: clamp(3.4rem, 2rem + 8vw, 7rem);
     line-height: .95;
     letter-spacing: .18em;
