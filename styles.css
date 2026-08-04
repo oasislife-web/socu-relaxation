@@ -8,18 +8,18 @@
 @layer reset, base, layout, components, utilities;
 
 /* ---------------------------------------------------------------
-   数字だけを Segoe UI にする仕掛け
+   数字だけのWebフォント
 
-   unicode-range で「0〜9 と ¥ のときだけこの書体を使う」と決めているため、
-   日本語や英文はこれまでどおり明朝体・Georgia のまま変わりません。
-   ※ Segoe UI は Windows にしか入っていないフォントです。
-     iPhone・Android・Mac では、後ろに書いた代替フォントが使われます。
+   数字・カンマ・小数点・¥ の12文字だけを切り出した Inter を読み込みます。
+   ファイルは 8KB。iPhone・Android・PC のどれで見ても同じ数字になります。
+
+   unicode-range で「この文字のときだけ使う」と指定しているため、
+   日本語と英文はこれまでどおり明朝体・Georgia のまま変わりません。
    --------------------------------------------------------------- */
 @font-face {
   font-family: "SiteNumerals";
-  src: local("Segoe UI"), local("SegoeUI"), local("Segoe UI Variable Text"),
-       local("Helvetica Neue"), local("Arial");
-  unicode-range: U+0030-0039, U+00A5, U+FFE5;
+  src: url("assets/fonts/inter-numerals.woff2") format("woff2");
+  unicode-range: U+002C, U+002E, U+0030-0039, U+00A5;
   font-display: swap;
 }
 
