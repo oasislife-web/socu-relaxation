@@ -8,6 +8,22 @@
 @layer reset, base, layout, components, utilities;
 
 /* ---------------------------------------------------------------
+   数字だけを Segoe UI にする仕掛け
+
+   unicode-range で「0〜9 と ¥ のときだけこの書体を使う」と決めているため、
+   日本語や英文はこれまでどおり明朝体・Georgia のまま変わりません。
+   ※ Segoe UI は Windows にしか入っていないフォントです。
+     iPhone・Android・Mac では、後ろに書いた代替フォントが使われます。
+   --------------------------------------------------------------- */
+@font-face {
+  font-family: "SiteNumerals";
+  src: local("Segoe UI"), local("SegoeUI"), local("Segoe UI Variable Text"),
+       local("Helvetica Neue"), local("Arial");
+  unicode-range: U+0030-0039, U+00A5, U+FFE5;
+  font-display: swap;
+}
+
+/* ---------------------------------------------------------------
    デザイントークン
    --------------------------------------------------------------- */
 @layer base {
@@ -29,8 +45,10 @@
     /* 文字 -----------------------------------------------------
        サイト全体を明朝体で統一しています。
        欧文も明朝の英字を使うため、和文と欧文で書体が混ざりません。 */
-    --font-display: Georgia, "Hiragino Mincho ProN", "Yu Mincho", YuMincho,
-                    "Noto Serif JP", "BIZ UDMincho", "MS PMincho", serif;
+    /* 先頭の SiteNumerals は数字専用(上の @font-face を参照)。
+       数字以外は Georgia(欧文)→ 明朝体(和文)の順に使われます。 */
+    --font-display: "SiteNumerals", Georgia, "Hiragino Mincho ProN", "Yu Mincho",
+                    YuMincho, "Noto Serif JP", "BIZ UDMincho", "MS PMincho", serif;
     --font-body:    var(--font-display);
 
     /* 余白 ----------------------------------------------------- */
@@ -96,13 +114,9 @@
     body { padding-block-end: 0; }
   }
 
-  p { text-wrap: pretty; }
-
-  /* 日本語が単語の途中で不自然に折り返されないようにする
-     (対応していないブラウザでは、これまでどおりの折り返しになるだけ) */
-  :where(p, h1, h2, h3, li, dd, dt, summary, figcaption, .hero__lead) {
-    word-break: auto-phrase;
-  }
+  /* 折り返しはブラウザ標準のまま。
+     text-wrap の balance / pretty や word-break: auto-phrase は、
+     見た目を整えるために右側をわざと余らせて早めに改行してしまうので使わない。 */
 
   a { text-underline-offset: .25em; }
 
@@ -179,7 +193,6 @@
     font-size: clamp(1.7rem, 1.1rem + 2.6vw, 2.9rem);
     line-height: 1.35;
     letter-spacing: .01em;
-    text-wrap: balance;
     margin-block-end: 1.25rem;
   }
 
