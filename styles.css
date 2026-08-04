@@ -17,7 +17,7 @@
     --paper-warm: #efefe8;  /* ひとつ沈めた背景 */
     --card:       #fffffc;
     --ink:        #1b241e;  /* 文字。緑みのある黒 */
-    --ink-soft:   #59635b;  /* 補足の文字 */
+    --ink-soft:   #4b554d;  /* 補足の文字。明朝は線が細いので少し濃いめ */
     --pine:       #0e5c36;  /* ロゴの濃い緑。主役 */
     --pine-deep:  #084025;
     --leaf:       #8cbf3f;  /* ロゴの黄緑。ごく少量だけ */
@@ -25,11 +25,12 @@
     --line:       #dedfd7;  /* 罫線 */
     --line-soft:  #ebece5;
 
-    /* 文字 ----------------------------------------------------- */
-    --font-display: "Fraunces", "Hiragino Mincho ProN", "Yu Mincho", "YuMincho",
-                    "Noto Serif JP", serif;
-    --font-body:    "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic",
-                    "YuGothic", "Noto Sans JP", system-ui, sans-serif;
+    /* 文字 -----------------------------------------------------
+       サイト全体を明朝体で統一しています。
+       欧文も明朝の英字を使うため、和文と欧文で書体が混ざりません。 */
+    --font-display: Georgia, "Hiragino Mincho ProN", "Yu Mincho", YuMincho,
+                    "Noto Serif JP", "BIZ UDMincho", "MS PMincho", serif;
+    --font-body:    var(--font-display);
 
     /* 余白 ----------------------------------------------------- */
     --gutter: clamp(1.25rem, 5vw, 3rem);
@@ -84,6 +85,8 @@
     line-height: 1.85;
     letter-spacing: .02em;
     -webkit-font-smoothing: antialiased;
+    /* 数字の高さを揃える(Georgiaは既定だと高さがバラつくため) */
+    font-variant-numeric: lining-nums;
     /* スマホの固定バーに隠れないよう下に余白 */
     padding-block-end: 4.5rem;
   }
@@ -93,6 +96,12 @@
   }
 
   p { text-wrap: pretty; }
+
+  /* 日本語が単語の途中で不自然に折り返されないようにする
+     (対応していないブラウザでは、これまでどおりの折り返しになるだけ) */
+  :where(p, h1, h2, h3, li, dd, dt, summary, figcaption, .hero__lead) {
+    word-break: auto-phrase;
+  }
 
   a { text-underline-offset: .25em; }
 
@@ -231,13 +240,18 @@
     align-items: center;
     gap: 1rem;
     padding: .5rem var(--gutter);
-    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    background: color-mix(in srgb, var(--pine-deep) 94%, transparent);
     backdrop-filter: blur(10px);
-    border-block-end: 1px solid var(--line-soft);
+    color: #fff;
   }
 
   .site-head__brand { display: block; line-height: 0; }
-  .site-head__brand img { inline-size: 3.1rem; block-size: auto; }
+  .site-head__brand img {
+    inline-size: 3.1rem;
+    block-size: auto;
+    /* 緑の帯に載せるので、ロゴを白抜きにする */
+    filter: brightness(0) invert(1);
+  }
 
   .site-nav {
     display: none;
@@ -250,20 +264,20 @@
 
   .site-nav a {
     text-decoration: none;
-    color: var(--ink-soft);
+    color: color-mix(in srgb, #fff 78%, transparent);
     padding-block: .35rem;
     border-block-end: 1px solid transparent;
     transition: color .2s, border-color .2s;
   }
-  .site-nav a:hover { color: var(--pine); border-block-end-color: var(--pine); }
+  .site-nav a:hover { color: #fff; border-block-end-color: var(--leaf); }
 
   .lang-toggle {
     margin-inline-start: auto;
     display: inline-flex;
     align-items: stretch;
-    border: 1px solid var(--line);
+    border: 1px solid color-mix(in srgb, #fff 38%, transparent);
     border-radius: 999px;
-    background: var(--card);
+    background: transparent;
     padding: 2px;
     cursor: pointer;
     overflow: hidden;
@@ -278,15 +292,17 @@
     font-size: .75rem;
     letter-spacing: .08em;
     border-radius: 999px;
-    color: var(--ink-soft);
+    color: color-mix(in srgb, #fff 72%, transparent);
     white-space: nowrap;
   }
 
   :root:not(.lang-en) .lang-toggle__opt[data-opt="ja"],
   :root.lang-en       .lang-toggle__opt[data-opt="en"] {
-    background: var(--pine);
-    color: #fff;
+    background: #fff;
+    color: var(--pine-deep);
   }
+
+  .site-head :focus-visible { outline-color: var(--leaf); }
 }
 
 /* ---------------------------------------------------------------
@@ -492,12 +508,51 @@
   }
 
   .course {
+    position: relative;
     display: grid;
     gap: 1rem;
     padding: clamp(1.5rem, 3vw, 2.25rem);
     background: var(--card);
     border: 1px solid var(--line);
     border-radius: 3px;
+    overflow: clip;
+    isolation: isolate;
+  }
+
+  /* 店内にある更紗(さらさ)の布を透かしに使い、余白に静かな模様を置く。
+     白地の画像を multiply で重ねているので、白い部分は消えて模様だけが残る */
+  .course::before {
+    content: "";
+    position: absolute;
+    inset-block-start: -10%;
+    inset-inline-end: -14%;
+    inline-size: 72%;
+    aspect-ratio: 1;
+    background: url("assets/img/pattern.webp") center / contain no-repeat;
+    mix-blend-mode: multiply;
+    opacity: .42;
+    /* 画像の四角い縁が出ないよう、外側に向かって消えるようにする */
+    mask-image: radial-gradient(closest-side, #000 35%, transparent 92%);
+    pointer-events: none;
+  }
+
+  /* 透かしより手前に本文を出す */
+  .course__kanji,
+  .course__body { position: relative; }
+
+  .course--featured { border-color: var(--pine); }
+
+  .course__badge {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-end: 0;
+    z-index: 1;
+    padding: .4rem 1rem;
+    background: var(--pine);
+    color: #fff;
+    font-size: .72rem;
+    letter-spacing: .12em;
+    border-end-start-radius: 3px;
   }
 
   .course__kanji {
