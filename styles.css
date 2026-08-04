@@ -256,8 +256,11 @@
     /* ヒーローの高さを計算で出しているので、ここは高さを固定する */
     block-size: var(--head-h);
     padding-inline: var(--gutter);
-    background: color-mix(in srgb, var(--pine-deep) 94%, transparent);
-    backdrop-filter: blur(10px);
+    /* 不透明にして backdrop-filter を外している。
+       元は 94% の半透明 + blur(10px) だったが、94% も塗ってあれば
+       ぼかしはほぼ見えないうえ、スクロール中ずっと背後(再生中の動画)を
+       ぼかし直すためスマホで引っかかる原因になっていた。 */
+    background: var(--pine-deep);
     color: #fff;
   }
 
@@ -550,12 +553,15 @@
     font-size: .8rem;
     letter-spacing: .06em;
   }
+  /* backdrop-filter(すりガラス)は使わない。
+     再生中の動画の上に重なると、スクロール中ずっと動画をぼかし直すことになり、
+     スマホ実機で文字やボタンが引っかかる原因になる。
+     半透明の黒を少し濃くするだけで読みやすさは同じに保てる。 */
   .hero__badges li {
     padding: .35rem .85rem;
     border: 1px solid color-mix(in srgb, #fff 40%, transparent);
     border-radius: 999px;
-    background: color-mix(in srgb, #000 18%, transparent);
-    backdrop-filter: blur(4px);
+    background: color-mix(in srgb, #000 32%, transparent);
   }
   .hero__badges strong { color: var(--leaf); font-weight: 500; }
 
