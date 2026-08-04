@@ -22,6 +22,7 @@
     --pine-deep:  #084025;
     --leaf:       #8cbf3f;  /* ロゴの黄緑。ごく少量だけ */
     --lamp:       #c8873c;  /* 店内のランプの色 */
+    --gold:       #c9a45c;  /* メニュー画像の金色。黒いカードの上でだけ使う */
     --line:       #dedfd7;  /* 罫線 */
     --line-soft:  #ebece5;
 
@@ -507,40 +508,31 @@
     .courses { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
 
+  /* お店の公式メニュー画像(筆文字＋仏像)をそのまま主役に置いた黒基調のカード */
   .course {
     position: relative;
     display: grid;
-    gap: 1rem;
-    padding: clamp(1.5rem, 3vw, 2.25rem);
-    background: var(--card);
-    border: 1px solid var(--line);
+    grid-template-rows: auto 1fr;
+    background: #10130f;
+    border: 1px solid color-mix(in srgb, #fff 14%, transparent);
     border-radius: 3px;
     overflow: clip;
-    isolation: isolate;
+    color: #fff;
   }
 
-  /* 店内にある更紗(さらさ)の布を透かしに使い、余白に静かな模様を置く。
-     白地の画像を multiply で重ねているので、白い部分は消えて模様だけが残る */
-  .course::before {
-    content: "";
-    position: absolute;
-    inset-block-start: -10%;
-    inset-inline-end: -14%;
-    inline-size: 72%;
-    aspect-ratio: 1;
-    background: url("assets/img/pattern.webp") center / contain no-repeat;
-    mix-blend-mode: multiply;
-    opacity: .42;
-    /* 画像の四角い縁が出ないよう、外側に向かって消えるようにする */
-    mask-image: radial-gradient(closest-side, #000 35%, transparent 92%);
-    pointer-events: none;
+  .course__art {
+    inline-size: 100%;
+    aspect-ratio: 16 / 11;
+    object-fit: cover;
   }
 
-  /* 透かしより手前に本文を出す */
-  .course__kanji,
-  .course__body { position: relative; }
+  .course__body {
+    display: grid;
+    align-content: start;
+    padding: clamp(1.35rem, 3vw, 1.9rem);
+  }
 
-  .course--featured { border-color: var(--pine); }
+  .course--featured { border-color: var(--gold); }
 
   .course__badge {
     position: absolute;
@@ -548,22 +540,11 @@
     inset-inline-end: 0;
     z-index: 1;
     padding: .4rem 1rem;
-    background: var(--pine);
-    color: #fff;
+    background: var(--gold);
+    color: #1a1508;
     font-size: .72rem;
     letter-spacing: .12em;
     border-end-start-radius: 3px;
-  }
-
-  .course__kanji {
-    font-family: var(--font-display);
-    font-weight: 300;
-    font-size: clamp(4.5rem, 3rem + 7vw, 7rem);
-    line-height: .8;
-    color: var(--pine);
-    display: block;
-    padding-block-end: 1rem;
-    border-block-end: 1px solid var(--line);
   }
 
   .course__name {
@@ -571,18 +552,19 @@
     font-weight: 400;
     font-size: 1.3rem;
     letter-spacing: .1em;
+    color: #fff;
   }
   :root:not(.lang-en) .course__name {
     font-size: .95rem;
     letter-spacing: .22em;
-    color: var(--ink-soft);
+    color: color-mix(in srgb, #fff 66%, transparent);
   }
 
   .course__meta {
     font-size: .85rem;
     letter-spacing: .12em;
-    color: var(--ink-soft);
-    margin-block-start: .4rem;
+    color: color-mix(in srgb, #fff 58%, transparent);
+    margin-block-start: .5rem;
   }
 
   .course__price {
@@ -590,10 +572,14 @@
     font-size: 2rem;
     font-weight: 400;
     line-height: 1.2;
-    margin-block: .3rem .6rem;
+    color: #fff;
+    margin-block: .35rem .7rem;
   }
 
-  .course__desc { font-size: .9rem; color: var(--ink-soft); }
+  .course__desc {
+    font-size: .9rem;
+    color: color-mix(in srgb, #fff 76%, transparent);
+  }
 }
 
 /* ---------------------------------------------------------------
