@@ -292,13 +292,20 @@
     .site-nav {
       display: flex;
       margin-inline-start: auto;
-      gap: 1.75rem;
+      /* 項目が7つあるので、狭いパソコン幅では間隔を詰めて折り返しを防ぐ */
+      gap: clamp(.9rem, 2.2vw, 1.75rem);
     }
     .site-nav a {
       padding-block: .35rem;
       border-block-end: 1px solid transparent;
     }
     .site-nav a:hover { border-block-end-color: var(--leaf); }
+
+    /* 「ご予約」だけは、いつでも行き先だと分かるように下線を出しておく */
+    .site-nav .nav-cta {
+      color: #fff;
+      border-block-end-color: var(--leaf);
+    }
   }
 
   /* スマホ ------------------------------------------------- */
@@ -425,8 +432,11 @@
        出入りするたび値が変わるため、高さが伸び縮みして画面が震える原因になる。
        svh は変動しないので、その揺れが起きない。 */
     min-block-size: calc(100svh - var(--head-h));
-    /* 固定バーにボタンが隠れないよう、下に固定バーぶんの余白を足す */
-    padding: clamp(3rem, 8vw, 6rem) var(--gutter)
+    /* 固定バーにボタンが隠れないよう、下に固定バーぶんの余白を足す。
+       左右の余白はここではなく .hero__inner に持たせる。
+       .section が「余白こみで --wide の箱」なのに対し、ここで左右に余白を取ると
+       「余白を引いた残りの中で --wide」になり、本文より余白1個ぶん左にズレてしまうため。 */
+    padding: clamp(3rem, 8vw, 6rem) 0
              calc(clamp(2.5rem, 6vw, 4.5rem) + var(--bar-h));
     overflow: clip;
     color: #fff;
@@ -495,12 +505,15 @@
     .hero__video { display: none; }
   }
 
-  /* 文字は動画より必ず手前に置く */
+  /* 文字は動画より必ず手前に置く。
+     幅と左右の余白は .section とまったく同じ指定にして、
+     ヒーローの文字と本文の左端がぴったり縦に揃うようにしている。 */
   .hero__inner {
     position: relative;
     z-index: 1;
     max-inline-size: var(--wide);
     inline-size: 100%;
+    padding-inline: var(--gutter);
     margin-inline: auto;
   }
 
@@ -769,6 +782,69 @@
 }
 
 /* ---------------------------------------------------------------
+   料金表＋写真の2列
+   料金表は 44rem で止まるため、広い画面では右側が大きく空く。
+   そこに店内の写真を1枚置いて埋めている。
+   --------------------------------------------------------------- */
+@layer components {
+  .menu-extra,
+  .flow-wrap {
+    display: grid;
+    gap: clamp(1.75rem, 4vw, 3rem);
+  }
+
+  /* 見出しの上の余白は、列がずれないように外側のまとまり側に持たせる */
+  .menu-extra { margin-block-start: 3.5rem; }
+  .menu-extra__lists > .subhead:first-child { margin-block-start: 0; }
+
+  @media (min-width: 54rem) {
+    .menu-extra { grid-template-columns: minmax(0, 1fr) minmax(0, 17rem); }
+    .flow-wrap  { grid-template-columns: minmax(0, 1fr) minmax(0, 20rem); }
+
+    .menu-extra,
+    .flow-wrap { align-items: start; }
+  }
+
+  /* スマホでは1列に積まれるので、背を低めに切って写真が画面を占領しないようにする */
+  .menu-extra__photo img,
+  .flow__photo img {
+    inline-size: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: 2px;
+  }
+
+  /* 写真ごとに、見せたい部分が中心にくるよう寄せる */
+  .menu-extra__photo img { object-position: 50% 42%; }
+  .flow__photo img       { object-position: 50% 62%; }
+
+  @media (min-width: 54rem) {
+    /* 写真の高さを、隣の列(料金表・流れ)にぴったり合わせる。
+       縦横比を決め打ちにすると、隣の列より少し短かったり少しはみ出したりして
+       「あと少しで揃わない」状態になり、そこが余白の穴に見えてしまう。
+       枠を列いっぱいに伸ばし、写真は枠を埋める形にして、下端を必ず揃える。 */
+    .menu-extra__photo,
+    .flow__photo {
+      align-self: stretch;
+      position: relative;
+      overflow: clip;
+      border-radius: 2px;
+      /* 隣の列が短くなったときでも写真がつぶれないようにする下限 */
+      min-block-size: 20rem;
+    }
+
+    .menu-extra__photo img,
+    .flow__photo img {
+      position: absolute;
+      inset: 0;
+      block-size: 100%;
+      aspect-ratio: auto;
+      border-radius: 0;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------
    アコーディオン(開閉)
    --------------------------------------------------------------- */
 @layer components {
@@ -1023,7 +1099,16 @@
    ご予約
    --------------------------------------------------------------- */
 @layer components {
-  .section--reserve { text-align: center; }
+  /* ページで唯一の目的が予約なので、ここだけヘッダー・フッターと同じ緑を敷いて
+     「ここが行動する場所」だと分かるようにしている。
+     背景を画面の端まで広げる仕組みは .section--tint と同じ。 */
+  .section--reserve {
+    text-align: center;
+    background: var(--pine-deep);
+    color: #fff;
+    box-shadow: 0 0 0 100vmax var(--pine-deep);
+    clip-path: inset(0 -100vmax);
+  }
 
   .section--reserve .eyebrow { justify-content: center; }
   .section--reserve .eyebrow::after { display: none; }
@@ -1031,6 +1116,38 @@
   .section--reserve .section__lead,
   .section--reserve .note {
     margin-inline: auto;
+  }
+
+  /* ---- 緑地の上での文字と線の色 ---- */
+  .section--reserve .eyebrow {
+    color: color-mix(in srgb, #fff 80%, var(--leaf));
+  }
+  .section--reserve .section__lead {
+    color: color-mix(in srgb, #fff 88%, transparent);
+  }
+  .section--reserve .note,
+  .section--reserve .form__note,
+  .section--reserve .field__label {
+    color: color-mix(in srgb, #fff 74%, transparent);
+  }
+  .section--reserve .accordion {
+    border-block-end-color: color-mix(in srgb, #fff 28%, transparent);
+  }
+  .section--reserve .accordion summary::after {
+    border-color: color-mix(in srgb, #fff 70%, transparent);
+  }
+  .section--reserve :focus-visible { outline-color: var(--leaf); }
+
+  /* ---- 緑地の上でのボタン ----
+     既定の Instagram(濃い墨色)と送信(緑)は、緑の上だと沈んで見えないので白に置き換える。 */
+  .section--reserve .btn--ig,
+  .section--reserve .btn--solid {
+    background: #fff;
+    color: var(--pine-deep);
+  }
+  .section--reserve .btn--ig:hover,
+  .section--reserve .btn--solid:hover {
+    background: color-mix(in srgb, #fff 86%, var(--leaf));
   }
 
   .reserve__cta {
@@ -1043,9 +1160,9 @@
 
   .reserve__story {
     font-size: .92rem;
-    color: var(--ink-soft);
+    color: color-mix(in srgb, #fff 74%, transparent);
   }
-  .reserve__story a { color: var(--pine); }
+  .reserve__story a { color: #fff; }
 
   .accordion--form {
     margin-inline: auto;

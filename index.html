@@ -37,6 +37,7 @@
     <a href="#voices"><span lang="ja">お客様の声</span><span lang="en">Reviews</span></a>
     <a href="#access"><span lang="ja">アクセス</span><span lang="en">Access</span></a>
     <a href="#faq"><span lang="ja">よくある質問</span><span lang="en">FAQ</span></a>
+    <a class="nav-cta" href="#reserve"><span lang="ja">ご予約</span><span lang="en">Book</span></a>
   </nav>
 
   <button type="button" class="lang-toggle" id="langToggle" aria-pressed="false">
@@ -211,33 +212,45 @@
     <span lang="en"><strong>Book at least one week ahead and take ¥1,000 off any of the three.</strong></span>
   </p>
 
-  <!-- オイルボディケア -->
-  <h3 class="subhead">
-    <span lang="ja">オイルボディケア</span>
-    <span lang="en">Oil body care</span>
-  </h3>
-  <p class="subhead__note">
-    <span lang="ja">天然オイルの全身トリートメント。お腹のチネイザンは含みません。</span>
-    <span lang="en">Full-body treatment with natural oils. Does not include abdominal Chi Nei Tsang.</span>
-  </p>
+  <!-- 料金表が左に寄って右が空くので、店内の写真を並べて置いている -->
+  <div class="menu-extra">
+    <div class="menu-extra__lists">
 
-  <ul class="pricelist">
-    <li><span class="pricelist__name">60<span lang="ja">分</span><span lang="en"> min</span></span><span class="pricelist__price">¥7,700</span></li>
-    <li><span class="pricelist__name">90<span lang="ja">分</span><span lang="en"> min</span></span><span class="pricelist__price">¥10,000</span></li>
-    <li><span class="pricelist__name">120<span lang="ja">分</span><span lang="en"> min</span> <em><span lang="ja">オーダーメイド</span><span lang="en">fully customised</span></em></span><span class="pricelist__price">¥14,000</span></li>
-  </ul>
+      <!-- オイルボディケア -->
+      <h3 class="subhead">
+        <span lang="ja">オイルボディケア</span>
+        <span lang="en">Oil body care</span>
+      </h3>
+      <p class="subhead__note">
+        <span lang="ja">天然オイルの全身トリートメント。お腹のチネイザンは含みません。</span>
+        <span lang="en">Full-body treatment with natural oils. Does not include abdominal Chi Nei Tsang.</span>
+      </p>
 
-  <!-- 単品 -->
-  <h3 class="subhead">
-    <span lang="ja">単品・オプション</span>
-    <span lang="en">Add-ons</span>
-  </h3>
-  <ul class="pricelist">
-    <li><span class="pricelist__name"><span lang="ja">足ツボ・ふくらはぎ 30分</span><span lang="en">Foot &amp; calf reflexology, 30 min</span></span><span class="pricelist__price">¥3,500</span></li>
-    <li><span class="pricelist__name"><span lang="ja">ドライヘッドスパ 20分</span><span lang="en">Dry head spa, 20 min</span></span><span class="pricelist__price">¥2,000</span></li>
-    <li><span class="pricelist__name"><span lang="ja">オイルハンド 20分</span><span lang="en">Hand &amp; arm oil massage, 20 min</span></span><span class="pricelist__price">¥2,000</span></li>
-    <li><span class="pricelist__name"><span lang="ja">シャワー <em>夏季限定</em></span><span lang="en">Shower <em>summer only</em></span></span><span class="pricelist__price">¥500</span></li>
-  </ul>
+      <ul class="pricelist">
+        <li><span class="pricelist__name">60<span lang="ja">分</span><span lang="en"> min</span></span><span class="pricelist__price">¥7,700</span></li>
+        <li><span class="pricelist__name">90<span lang="ja">分</span><span lang="en"> min</span></span><span class="pricelist__price">¥10,000</span></li>
+        <li><span class="pricelist__name">120<span lang="ja">分</span><span lang="en"> min</span> <em><span lang="ja">オーダーメイド</span><span lang="en">fully customised</span></em></span><span class="pricelist__price">¥14,000</span></li>
+      </ul>
+
+      <!-- 単品 -->
+      <h3 class="subhead">
+        <span lang="ja">単品・オプション</span>
+        <span lang="en">Add-ons</span>
+      </h3>
+      <ul class="pricelist">
+        <li><span class="pricelist__name"><span lang="ja">足ツボ・ふくらはぎ 30分</span><span lang="en">Foot &amp; calf reflexology, 30 min</span></span><span class="pricelist__price">¥3,500</span></li>
+        <li><span class="pricelist__name"><span lang="ja">ドライヘッドスパ 20分</span><span lang="en">Dry head spa, 20 min</span></span><span class="pricelist__price">¥2,000</span></li>
+        <li><span class="pricelist__name"><span lang="ja">オイルハンド 20分</span><span lang="en">Hand &amp; arm oil massage, 20 min</span></span><span class="pricelist__price">¥2,000</span></li>
+        <li><span class="pricelist__name"><span lang="ja">シャワー <em>夏季限定</em></span><span lang="en">Shower <em>summer only</em></span></span><span class="pricelist__price">¥500</span></li>
+      </ul>
+
+    </div>
+
+    <figure class="menu-extra__photo">
+      <img src="assets/img/warmer-plants.webp" alt="" width="1080" height="1920"
+           loading="lazy" decoding="async">
+    </figure>
+  </div>
 
   <p class="note">
     <span lang="ja">表示はすべて税込価格です。施術者は男性、メニューはすべて男性限定となります。</span>
@@ -301,6 +314,7 @@
     <span lang="en">What happens when you arrive</span>
   </h2>
 
+  <div class="flow-wrap">
   <ol class="flow">
     <li class="flow__step">
       <h3><span lang="ja">足湯</span><span lang="en">Foot bath</span></h3>
@@ -319,6 +333,12 @@
       <p><span lang="ja">施術後は無料のドリンクとお菓子をご用意しています。お帰りまでごゆっくりおくつろぎください。</span><span lang="en">A complimentary drink and a sweet afterwards. Please stay as long as you like before heading back out.</span></p>
     </li>
   </ol>
+
+    <figure class="flow__photo">
+      <img src="assets/img/vases.webp" alt="" width="1080" height="1920"
+           loading="lazy" decoding="async">
+    </figure>
+  </div>
 </section>
 
 <!-- ============ お客様の声 ============ -->
@@ -354,7 +374,7 @@
 </section>
 
 <!-- ============ セラピスト ============ -->
-<section class="section section--split" id="therapist">
+<section class="section section--tint section--split" id="therapist">
   <div class="split__media">
     <img src="assets/img/kishi.webp" width="1116" height="1164" loading="lazy" decoding="async"
          lang="ja" alt="ハーブボールを使って施術をするセラピストのキシさん">
@@ -379,7 +399,7 @@
 </section>
 
 <!-- ============ アクセス ============ -->
-<section class="section section--tint" id="access">
+<section class="section" id="access">
   <p class="eyebrow"><span lang="ja">アクセス</span><span lang="en">Access</span></p>
   <h2 class="section__title">
     <span lang="ja">博多駅から徒歩5分</span>
