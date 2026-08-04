@@ -468,6 +468,25 @@
     object-position: 28% 22%;
   }
 
+  /* スマホでは動画の高さを固定して、スクロール中に拡大しないようにする。
+     ヒーローの枠は 100svh 基準だが、実機ではブラウザのバーが引っ込むと
+     画面が広がり、枠につられて動画まで伸びてしまう。
+     そこで動画だけ「バーが引っ込んだときの高さ(lvh)」に先に合わせておく。
+     lvh はスクロールで変化しないので、動画の大きさが動かない。
+     はみ出したぶんは .hero の overflow: clip で切り取られる。
+     ヒーローが中身の量で svh より高くなる場合もあるため、
+     max() で「枠の高さ(100%)」を下限にして隙間が出ないようにしている。 */
+  @media (max-width: 47.9375rem) {
+    .hero__media { overflow: clip; }
+
+    .hero__video {
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline-start: 0;
+      block-size: max(100%, calc(100lvh - var(--head-h)));
+    }
+  }
+
   /* 動きを抑える設定の人には静止画(ポスター)だけを見せる */
   @media (prefers-reduced-motion: reduce) {
     .hero__video { display: none; }
@@ -1153,13 +1172,22 @@
   @media (min-width: 48rem) { .stickybar { display: none; } }
 
   .stickybar__btn {
-    display: grid;
-    place-items: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5em;
     min-block-size: 3.5rem;
     font-size: .9rem;
     letter-spacing: .06em;
     text-decoration: none;
     color: #fff;
+  }
+
+  /* 各サービスのアイコン。文字サイズに合わせて拡縮する */
+  .stickybar__icon {
+    inline-size: 1.25em;
+    block-size: 1.25em;
+    flex: none;
   }
 
   .stickybar__btn--line { background: #06c755; }
