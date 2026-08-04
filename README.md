@@ -4,6 +4,12 @@
 
 日本語と英語を1ページに入れて、右上のボタンで切り替える方式にしています。
 
+**確認用サイト**: https://oasislife-web.github.io/socu-relaxation/
+
+> ⚠ これは**キシさんに見てもらうための確認用**の公開です。
+> `index.html` に検索避け(`<meta name="robots" content="noindex, nofollow">`)を入れてあるので、
+> Googleなどの検索結果には出ません。**本番ドメインで公開するときは、その1行を必ず削除してください。**
+
 ---
 
 ## サイトを見る方法
