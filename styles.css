@@ -547,7 +547,10 @@
 
   .hero__lead {
     max-inline-size: 34rem;
-    font-size: clamp(1rem, .95rem + .3vw, 1.12rem);
+    /* スマホでは「…完全個室サロ / ン。」と1文字だけ折り返されてしまうため、
+       狭い画面のときだけ小さくしている(360px幅で1行に収まる大きさ)。
+       パソコン幅での大きさは変えていない */
+    font-size: clamp(.86rem, .7rem + .74vw, 1.12rem);
     line-height: 1.95;
     color: color-mix(in srgb, #fff 92%, transparent);
     margin-block-end: 1.6rem;
