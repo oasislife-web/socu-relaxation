@@ -22,7 +22,7 @@
     --pine-deep:  #084025;
     --leaf:       #8cbf3f;  /* ロゴの黄緑。ごく少量だけ */
     --lamp:       #c8873c;  /* 店内のランプの色 */
-    --gold:       #c9a45c;  /* メニュー画像の金色。黒いカードの上でだけ使う */
+    --gold:       #c9a45c;  /* メニュー画像の金色。黒いカードと、クチコミの★だけ */
     --line:       #dedfd7;  /* 罫線 */
     --line-soft:  #ebece5;
 
@@ -941,15 +941,82 @@
    お客様の声
    --------------------------------------------------------------- */
 @layer components {
+  /* 横に流れるクチコミの帯 --------------------------------------
+     .voices が窓、.voices__group が中身の一列。
+     2組目は index.html の一番下のJSがコピーで作ります。
+     1組ぶんの幅+すき間だけ左へずらすのを繰り返すと、2組目が1組目のいた
+     位置にぴったり重なるので、つなぎ目が見えません。
+
+     既定は「指で横スワイプするリスト」で、JSがコピーを作り終えて
+     .is-looping が付いたときだけ流れ始めます。
+     こうしておくと、JSが動かない環境でもカードが全部読めます。
+
+     流れる速さは --voices-speed(カード1枚が通り過ぎるのにかかる秒数)で
+     調整します。枚数(--voices-count)はJSが数えて入れるので、
+     カードを足しても速さは変わりません。 */
   .voices {
-    display: grid;
-    gap: 1.25rem;
+    --voices-gap: 1.25rem;
+    --voices-card: min(20rem, 78vw);
+    --voices-count: 1;
+    --voices-speed: 9s;
+
+    display: flex;
+    gap: var(--voices-gap);
+    /* JSが動かないとき用。横スワイプで全部読めるようにしておく */
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x proximity;
+    overscroll-behavior-inline: contain;
   }
-  @media (min-width: 54rem) {
-    .voices { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+  .voices__group {
+    display: flex;
+    gap: var(--voices-gap);
+    /* 縮まないようにする。縮むとカードの幅が揃わず、つなぎ目がズレる */
+    flex: 0 0 auto;
+  }
+
+  /* ---- ここから下は、JSがコピーを作れたときだけ効く ---- */
+  .voices.is-looping {
+    /* はみ出したカードを切る。clip は overflow: hidden と違って
+       スクロール位置を持たないので、流れている最中にズレません */
+    overflow: clip;
+    scroll-snap-type: none;
+    /* 左右の端をぼかして、カードがぶつ切りになる線を目立たなくする */
+    mask-image: linear-gradient(to right,
+                transparent, #000 3rem, #000 calc(100% - 3rem), transparent);
+  }
+
+  .voices.is-looping .voices__group {
+    animation: voices-flow calc(var(--voices-speed) * var(--voices-count))
+               linear infinite;
+  }
+
+  @keyframes voices-flow {
+    to { translate: calc(-100% - var(--voices-gap)) 0; }
+  }
+
+  /* 読みたい人のために、指を置いている間とキーボードで選んでいる間は止める */
+  .voices:hover .voices__group,
+  .voices:focus-within .voices__group { animation-play-state: paused; }
+
+  /* 動きが苦手な人の設定では流さず、手でスクロールする形に戻す。
+     コピーした2組目は不要なので隠す */
+  @media (prefers-reduced-motion: reduce) {
+    .voices.is-looping {
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x proximity;
+      mask-image: none;
+    }
+    .voices.is-looping .voices__group { animation: none; }
+    .voices__group[inert] { display: none; }
+    .voice { scroll-snap-align: start; }
   }
 
   .voice {
+    /* 全部のカードを同じ幅にする。幅がバラバラだとつなぎ目がズレる */
+    inline-size: var(--voices-card);
     display: grid;
     align-content: start;
     gap: 1rem;
@@ -957,6 +1024,17 @@
     background: var(--card);
     border: 1px solid var(--line);
     border-radius: 3px;
+    /* 中のリンクを、カード全体に広げるための基準 */
+    position: relative;
+  }
+
+  .voice__stars {
+    /* Googleのクチコミらしく金色。白いカードの上だと --gold のままでは
+       薄く飛んでしまうので、少しだけランプの色を混ぜて濃くしている */
+    color: color-mix(in oklab, var(--gold) 78%, var(--lamp));
+    font-size: .85rem;
+    letter-spacing: .12em;
+    line-height: 1;
   }
 
   .voice blockquote p {
@@ -976,6 +1054,24 @@
     color: var(--ink-soft);
   }
   .voice figcaption::before { content: "— "; }
+
+  /* カードのどこを押してもGoogleのクチコミへ飛べるようにする。
+     リンクの中身は投稿者名だけなので、読み上げソフトが本文を
+     まるごと読み上げてしまうことがありません */
+  .voice figcaption a {
+    text-decoration: none;
+    color: inherit;
+  }
+  .voice figcaption a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+  .voice:hover { border-color: var(--pine); }
+  /* カード全体に広がったリンクなので、枠線をカードの外側に出す */
+  .voice:focus-within { outline: 2px solid var(--pine); outline-offset: 3px; }
+  .voice figcaption a:focus-visible { outline: none; }
 
   .voices__link {
     margin-block-start: 1.75rem;
