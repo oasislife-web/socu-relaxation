@@ -1164,6 +1164,9 @@
   .payments__chart {
     inline-size: 100%;
     max-inline-size: 22rem;
+    /* 22rem で止まるぶん左右に余りが出るので、真ん中に置く。
+       スマホでは画面の中央、パソコンでは右の列の中央にそろう */
+    margin-inline: auto;
     block-size: auto;
     background: #fff;
     border: 1px solid var(--line);
