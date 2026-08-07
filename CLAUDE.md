@@ -10,6 +10,8 @@
 - セラピスト: キシさん(男性1名)。全メニュー男性限定
 - 主力: チネイザン(タイ古式の腹部トリートメント)。ほかにオイルトリートメント、メンズ脱毛
 - 条件: 料金10万円(買い切り)／納期1週間
+- 本番URL: https://socu-relaxation.com （キシさん名義のCloudflareでホスティング。
+  mainへpushすると自動でデプロイされる）
 
 ## このサイトのゴール
 
@@ -33,6 +35,9 @@
 - `index.html` … 1ページ完結のランディングページ
 - `styles.css` … `@layer reset, base, layout, components, utilities` で構成。色は `:root` のカスタムプロパティ
 - 言語切り替え … `<html>` の `lang-en` クラスで `[lang="ja"]` / `[lang="en"]` を出し分け。localStorageに保存
+- お問い合わせフォーム … サーバーを持たないので **mailto方式**。末尾のJSが送信を横取りし、
+  入力内容を本文に組み立ててお客さんのメールアプリを開く。宛先はJSの `TO` に定数で持たせてある
+  （`action` にも同じ宛先を書いてあるが、これはJSが動かなかったときの保険）
 - ヒーロー … 自動再生・無音・ループの背景動画。`prefers-reduced-motion` ではポスター画像のみ表示
   - **高さの単位に `dvh` を使わないこと。** `dvh` はスクロール中にブラウザのバーが出入りするたび
     値が変わるため、高さが伸び縮みして画面が震える(実機で発生を確認済み)。`svh` を使う
@@ -150,9 +155,7 @@
 ## 現在の未完了項目
 
 - ヒーロー動画は**フリー素材の仮置き**。キシさんの実際の店内映像に差し替える
-- お問い合わせフォームの `action` が空(送信されない)
 - 足湯・ドリンク・洗面所・外観の写真が未入手
-- 確認用公開のため `index.html` に `noindex` を入れている。本番ドメイン移行時に削除すること
 - `assets/img/` に未使用の写真が10枚ある(candle / fire-lamp / rattan-lamp / hanging-pothos /
   pothos-shelf / anthurium / eucalyptus / menu-boards / print-cloth / certificates)。
   **certificates(認定証)は本名がはっきり写っている**ので、載せる前にキシさんへ確認が必要

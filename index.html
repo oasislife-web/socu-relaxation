@@ -6,13 +6,13 @@
 <title>脱毛・リラクSOCU｜博多駅徒歩5分 男性専門リラクゼーション・チネイザン</title>
 <meta name="description" content="博多駅から徒歩5分。男性専門・完全個室のリラクゼーションサロン。本場タイ古式のチネイザン(腸もみ)とメンズ脱毛。Googleクチコミ★5.0。">
 
-<!-- ▼確認用サイトのため検索避け中。本番ドメインで公開するときは、この1行を必ず削除してください -->
-<meta name="robots" content="noindex, nofollow">
-
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://socu-relaxation.com/">
 <meta property="og:title" content="脱毛・リラクSOCU｜博多駅徒歩5分 男性専門サロン">
 <meta property="og:description" content="博多駅から徒歩5分。男性専門・完全個室。本場タイ古式のチネイザンとメンズ脱毛。">
-<meta property="og:image" content="assets/hero-poster.webp">
+<!-- og:image は絶対URLで書くこと。相対パスだとSNS側が画像を読みに行けず、
+     LINEやInstagramでURLを共有してもサムネイルが出ない -->
+<meta property="og:image" content="https://socu-relaxation.com/assets/hero-poster.webp">
 <meta property="og:locale" content="ja_JP">
 
 <link rel="icon" href="assets/img/logo.webp" type="image/webp">
@@ -536,11 +536,12 @@
   </p>
 
   <!-- お問い合わせフォーム
-       TODO: action に送信先を設定する(現在は未設定のため送信されません) -->
+       送信先はページ末尾のJSに書いてある(入力内容をメール本文に組み立てて
+       メールアプリを開く方式)。action の mailto: はJSが動かなかったときの保険 -->
   <details class="accordion accordion--form">
     <summary><span lang="ja">メールで問い合わせる</span><span lang="en">Send a message by email instead</span></summary>
 
-    <form class="form" action="" method="post">
+    <form class="form" action="mailto:kou47u7sor@icloud.com" method="post" enctype="text/plain">
       <p class="form__note">
         <span lang="ja">LINEもInstagramもお使いでない方は、こちらからどうぞ。</span>
         <span lang="en">If you use neither LINE nor Instagram, write to us here.</span>
@@ -560,6 +561,11 @@
         <span class="field__label"><span lang="ja">ご希望のメニュー・日時</span><span lang="en">Treatment and preferred time</span></span>
         <textarea name="message" rows="5" required></textarea>
       </label>
+
+      <p class="form__note">
+        <span lang="ja">送信ボタンを押すと、お使いのメールアプリが立ち上がります。内容をご確認のうえ、そのまま送信してください。</span>
+        <span lang="en">The button opens your email app with this message ready. Please check it and press send there.</span>
+      </p>
 
       <button class="btn btn--solid" type="submit">
         <span lang="ja">送信する</span><span lang="en">Send</span>
@@ -750,6 +756,45 @@
 
   /* コピーができてから動かし始める(コピー前に動くと隙間が見えるため) */
   strip.classList.add('is-looping');
+})();
+
+/* ============ お問い合わせフォーム ============
+   HTMLを置いているだけの静的サイトなので、サーバーでメールを送る仕組みがありません。
+   代わりに、入力された内容をメールの本文に組み立てて、お客さんのメールアプリを
+   開くところまでをここで行います。送信そのものはお客さんの手元で行われます。
+
+   <form action="mailto:..."> と書くだけでは今のブラウザはほとんど反応しないため、
+   送信を横取りして mailto: のリンクを自分で組み立てています。
+   表示中の言語に合わせて、件名と本文の見出しも切り替えます。 */
+(function () {
+  var form = document.querySelector('.form');
+  if (!form) return;
+
+  var TO = 'kou47u7sor@icloud.com';
+
+  function value(name) {
+    var el = form.querySelector('[name="' + name + '"]');
+    return el ? el.value.trim() : '';
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    var en = document.documentElement.classList.contains('lang-en');
+    var subject = en ? 'Enquiry from the SOCU website' : 'ホームページからのお問い合わせ';
+
+    var body = en
+      ? 'Name: ' + value('name') + '\n'
+        + 'Email: ' + value('email') + '\n\n'
+        + 'Treatment and preferred time:\n' + value('message') + '\n'
+      : 'お名前: ' + value('name') + '\n'
+        + 'メールアドレス: ' + value('email') + '\n\n'
+        + 'ご希望のメニュー・日時:\n' + value('message') + '\n';
+
+    window.location.href = 'mailto:' + TO
+      + '?subject=' + encodeURIComponent(subject)
+      + '&body=' + encodeURIComponent(body);
+  });
 })();
 </script>
 
