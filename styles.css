@@ -1285,10 +1285,13 @@
     color: var(--ink-soft);
   }
 
+  /* 文字色は必ず指定すること。予約セクションは緑地なので文字色が白に
+     上書きされており、指定しないと白い入力欄に白い文字になって読めなくなる */
   .field :where(input, textarea) {
     inline-size: 100%;
     padding: .75rem .9rem;
     background: var(--card);
+    color: var(--ink);
     border: 1px solid var(--line);
     border-radius: 3px;
     font-size: 1rem;
