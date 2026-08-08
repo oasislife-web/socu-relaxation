@@ -537,11 +537,14 @@
 
   <!-- お問い合わせフォーム
        送信先はページ末尾のJSに書いてある(入力内容をメール本文に組み立てて
-       メールアプリを開く方式)。action の mailto: はJSが動かなかったときの保険 -->
+       メールアプリを開く方式)。
+       ▼ action に mailto: を書かないこと。ブラウザが「安全でない送信先」とみなして
+         自動入力(名前・メールアドレスの入力補助)をオフにしてしまう。
+         宛先がHTMLに露出してスパム業者に拾われる問題もある -->
   <details class="accordion accordion--form">
     <summary><span lang="ja">メールで問い合わせる</span><span lang="en">Send a message by email instead</span></summary>
 
-    <form class="form" action="mailto:kou47u7sor@icloud.com" method="post" enctype="text/plain">
+    <form class="form">
       <p class="form__note">
         <span lang="ja">LINEもInstagramもお使いでない方は、こちらからどうぞ。</span>
         <span lang="en">If you use neither LINE nor Instagram, write to us here.</span>
