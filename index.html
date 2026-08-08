@@ -481,12 +481,25 @@
       </dl>
     </div>
 
+    <!-- 地図は緯度経度ではなく cid(Googleビジネスプロフィールの固有番号)で指定している。
+         座標だけだとピンが立つだけで店名も出ず、押しても店の情報にたどり着けないため。
+         cid は短縮URLの展開先に含まれる 0x91e9ac905b129cb1 を10進にしたもの。
+         hl(表示言語)はあえて指定していない。指定すると全員がその言語で見ることになるが、
+         省けばGoogleが見ている人のブラウザ設定に合わせてくれる(海外からの客が主な相手のため) -->
     <div class="access__map">
-      <iframe
-        src="https://www.google.com/maps?q=33.5878377,130.4164107&hl=ja&z=17&output=embed"
-        title="脱毛・リラクSOCU の地図" width="600" height="450"
-        style="border:0" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-        allowfullscreen></iframe>
+      <div class="access__map-frame">
+        <iframe
+          src="https://www.google.com/maps?cid=10514124541076348081&z=17&output=embed"
+          title="脱毛・リラクSOCU の地図" width="600" height="450"
+          style="border:0" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+          allowfullscreen></iframe>
+      </div>
+      <p class="access__map-link">
+        <a href="https://maps.app.goo.gl/zrum55qZ4R8DvX8T7" target="_blank" rel="noopener">
+          <span lang="ja">Googleマップで開く(道順を調べる)</span>
+          <span lang="en">Open in Google Maps for directions</span>
+        </a>
+      </p>
     </div>
   </div>
 
@@ -735,11 +748,19 @@
 })();
 
 /* ============ お客様の声を横に流す ============
-   カードの並びをもう1組コピーして後ろにつなげます。
-   1組ぶんの幅だけ左へずらすアニメーションを繰り返すと、
-   2組目が1組目のいた位置にぴったり重なるので、つなぎ目が見えません。
+   カードの並びをあと2組コピーして、同じ内容を3組つなげます。
+   真ん中の組を見ている状態から始めるので、左右どちらへ送っても
+   1組ぶんの余裕があります。端に近づいたら位置を1組ぶん戻しますが、
+   中身が同じなので見た目は何も変わりません。
 
-   HTMLに2組書いてしまうと「カードを足すとき両方直す」必要が出て
+   流し方は「見た目だけ動かす」のではなく、実際にスクロールさせています。
+   そのおかげで、指でのスワイプも、その勢いで滑る慣性も、
+   ブラウザ本来の動きがそのまま使えます。マウスで掴む操作だけは
+   標準では効かないので、下のほうで足しています。
+
+   触っている間は止まり、手を離して2秒後にまた流れ出します。
+
+   HTMLに3組書いてしまうと「カードを足すとき3ヶ所直す」必要が出て
    直し忘れのもとになるため、コピーはここで作っています。
    JSが動かない環境では1組のまま、指で横スワイプできるリストになります。 */
 (function () {
@@ -747,18 +768,154 @@
   var group = strip && strip.querySelector('.voices__group');
   if (!group) return;
 
-  /* カードが少ないと1周が短すぎるので、枚数に応じて流れる時間を決める。
-     枚数はここで数えるので、CSS側の数を手で直す必要はありません */
-  strip.style.setProperty('--voices-count', group.children.length);
+  /* 動きが苦手な人の設定では、何もせず素の横スワイプのリストのままにする */
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (reduce.matches) return;
 
-  var copy = group.cloneNode(true);
   /* 見た目だけの複製。読み上げソフトとキーボード操作からは外す */
-  copy.setAttribute('aria-hidden', 'true');
-  copy.setAttribute('inert', '');
-  strip.appendChild(copy);
+  for (var i = 0; i < 2; i++) {
+    var copy = group.cloneNode(true);
+    copy.setAttribute('aria-hidden', 'true');
+    copy.setAttribute('inert', '');
+    strip.appendChild(copy);
+  }
 
   /* コピーができてから動かし始める(コピー前に動くと隙間が見えるため) */
   strip.classList.add('is-looping');
+
+  var loopWidth = 0;   /* 1組ぶんの幅。ここまで進んだら位置を戻す */
+  var speed = 0;       /* 1秒あたり何px流すか */
+
+  function measure() {
+    var cs = getComputedStyle(strip);
+    var gap = parseFloat(cs.columnGap) || 0;
+    var seconds = parseFloat(cs.getPropertyValue('--voices-speed')) || 9;
+    var card = strip.querySelector('.voice');
+
+    loopWidth = group.getBoundingClientRect().width + gap;
+    speed = (card && seconds > 0)
+      ? (card.getBoundingClientRect().width + gap) / seconds
+      : 0;
+
+    /* 真ん中の組へ。左にも右にも1組ぶんの余裕がある位置 */
+    strip.scrollLeft = loopWidth;
+  }
+  measure();
+
+  /* 測り直すのは横幅が変わったときだけ。スマホはスクロールのたびに
+     アドレスバーが出入りして resize が飛んでくるので、
+     縦の変化で測り直すと見ている位置が勝手に戻ってしまう */
+  var lastWidth = window.innerWidth;
+  window.addEventListener('resize', function () {
+    if (window.innerWidth === lastWidth) return;
+    lastWidth = window.innerWidth;
+    measure();
+  });
+
+  var held = false;      /* マウスが乗っている / キーボードで選んでいる */
+  var dragging = false;
+  var resumeAt = 0;      /* この時刻を過ぎるまでは自動で流さない */
+  var RESUME_DELAY = 2000;
+
+  function running() {
+    return !held && !dragging && Date.now() >= resumeAt;
+  }
+
+  function pause() { resumeAt = Date.now() + RESUME_DELAY; }
+
+  /* 端に近づいたら1組ぶん戻す。中身が同じなので見た目は変わらない。
+     戻したぶんを返すのは、掴んでいる最中に基準点がズレないようにするため */
+  function wrap() {
+    if (loopWidth <= 0) return 0;
+    var shift = 0;
+    if (strip.scrollLeft >= loopWidth * 2) shift = -loopWidth;
+    else if (strip.scrollLeft <= 0) shift = loopWidth;
+    if (shift) strip.scrollLeft += shift;
+    return shift;
+  }
+
+  /* 流している最中の位置を、小数まで自分で持っておく。
+     scrollLeft は小数を保てず整数に丸められるので、1コマぶんの移動量(1px未満)を
+     そのまま足し続けると毎コマ1pxに切り上がってしまい、
+     画面のリフレッシュレートが高い端末ほど速く流れてしまう */
+  var pos = null;
+  var prev = 0;
+
+  function tick(now) {
+    var dt = prev ? (now - prev) / 1000 : 0;
+    prev = now;
+    /* 別のタブを見ていた間の時間がまとめて流れ込むと一気に飛ぶので、頭を押さえる */
+    if (dt > 0.1) dt = 0.1;
+
+    if (running()) {
+      /* こちらが置いた位置から離れていたら、指やホイールで動かされたということ。
+         その位置を新しい起点にする */
+      if (pos === null || Math.abs(strip.scrollLeft - pos) > 2) pos = strip.scrollLeft;
+      pos += speed * dt;
+      strip.scrollLeft = pos;
+    } else {
+      pos = null;
+    }
+
+    var shift = wrap();
+    if (shift && pos !== null) pos += shift;
+
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  /* 読みたい人のために、マウスを乗せている間とキーボードで選んでいる間は止める */
+  strip.addEventListener('mouseenter', function () { held = true; });
+  strip.addEventListener('focusin',    function () { held = true; });
+  strip.addEventListener('mouseleave', function () { held = false; pause(); });
+  strip.addEventListener('focusout',   function () { held = false; pause(); });
+
+  /* 指でスワイプしている間とホイールを回している間も止める */
+  strip.addEventListener('touchstart', function () { resumeAt = Infinity; }, { passive: true });
+  strip.addEventListener('touchend',    pause);
+  strip.addEventListener('touchcancel', pause);
+  strip.addEventListener('wheel',       pause, { passive: true });
+
+  /* ---- マウスで掴んで動かす ----
+     指(タッチ)はブラウザ任せのほうが慣性がついて自然に滑るので、
+     横取りするのはマウスのときだけ */
+  var startX = 0;
+  var startScroll = 0;
+  var moved = 0;
+
+  strip.addEventListener('pointerdown', function (e) {
+    moved = 0;
+    if (e.pointerType !== 'mouse' || e.button !== 0) return;
+    dragging = true;
+    startX = e.clientX;
+    startScroll = strip.scrollLeft;
+    strip.classList.add('is-dragging');
+    strip.setPointerCapture(e.pointerId);
+  });
+
+  strip.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    var dx = e.clientX - startX;
+    if (Math.abs(dx) > moved) moved = Math.abs(dx);
+    strip.scrollLeft = startScroll - dx;
+    startScroll += wrap();
+  });
+
+  function endDrag(e) {
+    if (!dragging) return;
+    dragging = false;
+    strip.classList.remove('is-dragging');
+    pause();
+    if (strip.hasPointerCapture(e.pointerId)) strip.releasePointerCapture(e.pointerId);
+  }
+  strip.addEventListener('pointerup', endDrag);
+  strip.addEventListener('pointercancel', endDrag);
+
+  /* 掴んで動かしただけのときに、指を離した先のカードのリンクが
+     開いてしまわないようにする(カード全体がGoogleマップへのリンクのため) */
+  strip.addEventListener('click', function (e) {
+    if (moved > 5) { e.preventDefault(); e.stopPropagation(); }
+  }, true);
 })();
 
 /* ============ お問い合わせフォーム ============

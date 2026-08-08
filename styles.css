@@ -946,26 +946,28 @@
 @layer components {
   /* 横に流れるクチコミの帯 --------------------------------------
      .voices が窓、.voices__group が中身の一列。
-     2組目は index.html の一番下のJSがコピーで作ります。
-     1組ぶんの幅+すき間だけ左へずらすのを繰り返すと、2組目が1組目のいた
-     位置にぴったり重なるので、つなぎ目が見えません。
+     同じ並びをあと2組ぶん、index.html の一番下のJSがコピーで作ります。
+     真ん中の組を見ている状態から始まるので、左右どちらへ送っても
+     カードが途切れません(端に近づいたらJSが1組ぶん位置を戻します)。
+
+     流し方は「見た目だけ動かす」のではなく、実際にスクロールさせています。
+     そのおかげで、指でのスワイプ・その勢いで滑る慣性・マウスで掴んで動かす、
+     が全部そのまま効きます。
 
      既定は「指で横スワイプするリスト」で、JSがコピーを作り終えて
      .is-looping が付いたときだけ流れ始めます。
      こうしておくと、JSが動かない環境でもカードが全部読めます。
 
-     流れる速さは --voices-speed(カード1枚が通り過ぎるのにかかる秒数)で
-     調整します。枚数(--voices-count)はJSが数えて入れるので、
-     カードを足しても速さは変わりません。 */
+     流れる速さは --voices-speed(カード1枚が通り過ぎるのにかかる秒数)。
+     JSがこの値を読んで1秒あたりの移動量を計算するので、
+     速さを変えたいときはここだけ直せば済みます。 */
   .voices {
     --voices-gap: 1.25rem;
     --voices-card: min(20rem, 78vw);
-    --voices-count: 1;
     --voices-speed: 9s;
 
     display: flex;
     gap: var(--voices-gap);
-    /* JSが動かないとき用。横スワイプで全部読めるようにしておく */
     overflow-x: auto;
     overflow-y: hidden;
     scroll-snap-type: x proximity;
@@ -979,43 +981,29 @@
     flex: 0 0 auto;
   }
 
+  /* JSが動かないときは、1枚ずつ揃って止まる横スワイプのリストになる。
+     流れているとき(.is-looping)は、途中で引っかかると動きが不自然なので切る */
+  .voice { scroll-snap-align: start; }
+
   /* ---- ここから下は、JSがコピーを作れたときだけ効く ---- */
   .voices.is-looping {
-    /* はみ出したカードを切る。clip は overflow: hidden と違って
-       スクロール位置を持たないので、流れている最中にズレません */
-    overflow: clip;
+    /* 流している最中に1枚ずつ揃えようとすると、揃える力とぶつかって
+       引っかかるので切る。指を離した位置でそのまま止まる */
     scroll-snap-type: none;
     /* 左右の端をぼかして、カードがぶつ切りになる線を目立たなくする */
     mask-image: linear-gradient(to right,
                 transparent, #000 3rem, #000 calc(100% - 3rem), transparent);
+    /* 掴んで動かせることを、カーソルの形で伝える */
+    cursor: grab;
+    /* スクロールバーは出さない。帯の見た目が変わってしまうため
+       (掴めることは cursor のほうで伝わる) */
+    scrollbar-width: none;
   }
+  .voices.is-looping::-webkit-scrollbar { display: none; }
 
-  .voices.is-looping .voices__group {
-    animation: voices-flow calc(var(--voices-speed) * var(--voices-count))
-               linear infinite;
-  }
-
-  @keyframes voices-flow {
-    to { translate: calc(-100% - var(--voices-gap)) 0; }
-  }
-
-  /* 読みたい人のために、指を置いている間とキーボードで選んでいる間は止める */
-  .voices:hover .voices__group,
-  .voices:focus-within .voices__group { animation-play-state: paused; }
-
-  /* 動きが苦手な人の設定では流さず、手でスクロールする形に戻す。
-     コピーした2組目は不要なので隠す */
-  @media (prefers-reduced-motion: reduce) {
-    .voices.is-looping {
-      overflow-x: auto;
-      overflow-y: hidden;
-      scroll-snap-type: x proximity;
-      mask-image: none;
-    }
-    .voices.is-looping .voices__group { animation: none; }
-    .voices__group[inert] { display: none; }
-    .voice { scroll-snap-align: start; }
-  }
+  .voices.is-dragging { cursor: grabbing; }
+  /* 掴んで動かしている間に、文字が選択されてしまうのを防ぐ */
+  .voices.is-dragging * { user-select: none; }
 
   .voice {
     /* 全部のカードを同じ幅にする。幅がバラバラだとつなぎ目がズレる */
@@ -1132,13 +1120,25 @@
 
   .info dd { font-size: .95rem; margin-block-start: .3rem; }
 
+  /* 地図本体と、その下の「Googleマップで開く」リンクを縦に積む。
+     align-content: start は、2列に並んだとき左の住所側の高さに引きずられて
+     地図が間延びしないようにするため */
   .access__map {
+    display: grid;
+    gap: .75rem;
+    align-content: start;
+  }
+
+  .access__map-frame {
     aspect-ratio: 4 / 3;
     border-radius: 3px;
     overflow: hidden;
     border: 1px solid var(--line);
   }
-  .access__map iframe { inline-size: 100%; block-size: 100%; }
+  .access__map-frame iframe { inline-size: 100%; block-size: 100%; }
+
+  .access__map-link { font-size: .9rem; }
+  .access__map-link a { color: var(--pine); }
 
   /* お支払い方法 */
   .payments {
